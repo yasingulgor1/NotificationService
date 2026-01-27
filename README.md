@@ -465,6 +465,3 @@ Available metrics:
 curl http://localhost:8080/metrics/realtime
 ```
 
-## License
-
-MIT License - see [LICENSE](LICENSE) for details.
