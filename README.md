@@ -165,7 +165,19 @@ http://localhost:8080
 
 ### OpenAPI Specification
 
-The full API documentation is available at `api/openapi.yaml` or can be viewed using Swagger UI.
+The full API documentation is available at `api/openapi.yaml`.
+
+### Swagger UI
+
+Interactive API documentation is available at **http://localhost:8081** when running with Docker Compose.
+
+```bash
+# Start all services including Swagger UI
+docker compose up -d
+
+# Open Swagger UI
+open http://localhost:8081
+```
 
 ### Endpoints Overview
 
