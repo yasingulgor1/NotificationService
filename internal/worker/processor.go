@@ -270,6 +270,7 @@ func (p *Processor) handleSendError(ctx context.Context, notification *domain.No
 	if updateErr := p.notificationRepo.Update(ctx, notification); updateErr != nil {
 		return updateErr
 	}
+	p.broadcastStatus(notification)
 
 	logger.Warn("notification will be retried",
 		"retry_count", notification.RetryCount,
