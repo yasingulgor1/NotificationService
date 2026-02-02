@@ -133,33 +133,38 @@ func main() {
 	// Setup router
 	r := chi.NewRouter()
 
-	// Global middleware
+	// Global middleware (applied to all routes)
 	r.Use(chimiddleware.RequestID)
 	r.Use(middleware.Correlation)
 	r.Use(middleware.Recovery(logger))
 	r.Use(middleware.Logging(logger))
-	r.Use(chimiddleware.Compress(5))
 
-	// Health endpoints
-	r.Get("/health", healthHandler.Health)
-	r.Get("/health/live", healthHandler.Liveness)
-	r.Get("/health/ready", healthHandler.Readiness)
-
-	// Metrics endpoints
-	r.Handle("/metrics", metricsHandler.Handler())
-	r.Get("/metrics/realtime", metricsHandler.RealtimeMetrics)
-
-	// WebSocket endpoint
+	// WebSocket endpoint - MUST be before Compress middleware
+	// (Compress doesn't support http.Hijacker needed for WebSocket)
 	r.Get("/ws", wsHandler.HandleWebSocket)
 
-	// API routes
-	r.Route("/api/v1", func(r chi.Router) {
-		r.Route("/notifications", func(r chi.Router) {
-			notificationHandler.RegisterRoutes(r)
-		})
+	// Apply Compress middleware to remaining routes
+	r.Group(func(r chi.Router) {
+		r.Use(chimiddleware.Compress(5))
 
-		r.Route("/templates", func(r chi.Router) {
-			templateHandler.RegisterRoutes(r)
+		// Health endpoints
+		r.Get("/health", healthHandler.Health)
+		r.Get("/health/live", healthHandler.Liveness)
+		r.Get("/health/ready", healthHandler.Readiness)
+
+		// Metrics endpoints
+		r.Handle("/metrics", metricsHandler.Handler())
+		r.Get("/metrics/realtime", metricsHandler.RealtimeMetrics)
+
+		// API routes
+		r.Route("/api/v1", func(r chi.Router) {
+			r.Route("/notifications", func(r chi.Router) {
+				notificationHandler.RegisterRoutes(r)
+			})
+
+			r.Route("/templates", func(r chi.Router) {
+				templateHandler.RegisterRoutes(r)
+			})
 		})
 	})
 
